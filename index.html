@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEP Guard — Diagnóstico de Tromboembolismo Pulmonar</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --slate-950: #020617;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-400: #94a3b8;
+    --slate-300: #cbd5e1;
+    --slate-200: #e2e8f0;
+    --emerald-400: #34d399;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --rose-400: #fb7185;
+    --rose-500: #f43f5e;
+    --rose-600: #e11d48;
+    --amber-400: #fbbf24;
+    --amber-500: #f59e0b;
+    --cyan-400: #22d3ee;
+    --cyan-500: #06b6d4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--slate-950);
+    color: var(--slate-300);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(6,182,212,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(16,185,129,0.04) 0%, transparent 50%);
+  }
+
+  .app-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  /* HEADER */
+  .app-header {
+    border-bottom: 1px solid rgba(148,163,184,0.1);
+    padding: 20px 0 18px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .header-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.65rem;
+    color: #e2e8f0;
+    letter-spacing: -0.01em;
+  }
+
+  .header-title span {
+    color: var(--cyan-400);
+    font-style: italic;
+  }
+
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    background: rgba(6,182,212,0.12);
+    color: var(--cyan-400);
+    border: 1px solid rgba(6,182,212,0.25);
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .header-source {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--slate-600);
+    letter-spacing: 0.05em;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* LAYOUT GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* CARDS */
+  .card {
+    background: rgba(30,41,59,0.6);
+    border: 1px solid rgba(148,163,184,0.1);
+    border-radius: 12px;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s;
+  }
+
+  .card:hover {
+    border-color: rgba(148,163,184,0.18);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .card-step {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    background: rgba(148,163,184,0.08);
+    color: var(--slate-400);
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid rgba(148,163,184,0.12);
+  }
+
+  .card-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.05rem;
+    color: var(--slate-200);
+    letter-spacing: -0.01em;
+  }
+
+  /* INPUTS */
+  .input-group {
+    margin-bottom: 16px;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    color: var(--slate-500, #64748b);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .input-field {
+    width: 100%;
+    background: rgba(15,23,42,0.8);
+    border: 1px solid rgba(148,163,184,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--slate-200);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  .input-field::-webkit-outer-spin-button,
+  .input-field::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .input-field:focus {
+    border-color: var(--cyan-500);
+    box-shadow: 0 0 0 3px rgba(6,182,212,0.1);
+  }
+
+  .input-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--slate-600);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  /* WELLS ITEMS */
+  .wells-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(148,163,184,0.08);
+    background: rgba(15,23,42,0.4);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .wells-item:hover:not(.auto-item) {
+    border-color: rgba(148,163,184,0.2);
+    background: rgba(15,23,42,0.7);
+  }
+
+  .wells-item.checked {
+    border-color: rgba(6,182,212,0.3);
+    background: rgba(6,182,212,0.07);
+  }
+
+  .wells-item.auto-item {
+    cursor: default;
+    opacity: 0.85;
+  }
+
+  .wells-item.auto-item.checked {
+    border-color: rgba(251,191,36,0.3);
+    background: rgba(251,191,36,0.06);
+  }
+
+  .checkbox-box {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(148,163,184,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: all 0.15s;
+    background: transparent;
+  }
+
+  .wells-item.checked .checkbox-box {
+    background: var(--cyan-500);
+    border-color: var(--cyan-500);
+  }
+
+  .wells-item.auto-item.checked .checkbox-box {
+    background: var(--amber-500);
+    border-color: var(--amber-500);
+  }
+
+  .checkbox-icon {
+    display: none;
+    width: 10px;
+    height: 10px;
+    color: white;
+  }
+
+  .wells-item.checked .checkbox-icon { display: block; }
+
+  .item-text {
+    flex: 1;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--slate-300);
+  }
+
+  .item-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--slate-500);
+    white-space: nowrap;
+    padding-top: 2px;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  .wells-item.checked .item-score {
+    color: var(--cyan-400);
+    font-weight: 500;
+  }
+
+  .auto-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    background: rgba(251,191,36,0.12);
+    color: var(--amber-400);
+    border: 1px solid rgba(251,191,36,0.2);
+    padding: 1px 5px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-top: 3px;
+  }
+
+  /* SCORE DISPLAY */
+  .score-display {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(148,163,184,0.12);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .score-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--slate-500);
+    text-transform: uppercase;
+  }
+
+  .score-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .score-category {
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  /* RESULT CARDS */
+  .result-card {
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-top: 16px;
+    border: 1px solid;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-card.danger {
+    background: rgba(244,63,94,0.08);
+    border-color: rgba(244,63,94,0.35);
+  }
+
+  .result-card.success {
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.35);
+  }
+
+  .result-card.warning {
+    background: rgba(245,158,11,0.08);
+    border-color: rgba(245,158,11,0.35);
+  }
+
+  .result-card.info {
+    background: rgba(6,182,212,0.06);
+    border-color: rgba(6,182,212,0.25);
+  }
+
+  .result-icon {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 10px;
+  }
+
+  .result-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+
+  .result-card.danger .result-title { color: var(--rose-400); }
+  .result-card.success .result-title { color: var(--emerald-400); }
+  .result-card.warning .result-title { color: var(--amber-400); }
+  .result-card.info .result-title { color: var(--cyan-400); }
+
+  .result-body {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--slate-400);
+  }
+
+  /* PERC SECTION */
+  .section-block {
+    margin-bottom: 24px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--slate-600);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(148,163,184,0.1);
+  }
+
+  /* YEARS SECTION */
+  .years-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(148,163,184,0.08);
+    background: rgba(15,23,42,0.4);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .years-item:hover {
+    border-color: rgba(148,163,184,0.2);
+    background: rgba(15,23,42,0.7);
+  }
+
+  .years-item.checked {
+    border-color: rgba(245,158,11,0.3);
+    background: rgba(245,158,11,0.07);
+  }
+
+  .years-item.checked .checkbox-box {
+    background: var(--amber-500);
+    border-color: var(--amber-500);
+  }
+
+  /* DIMERO D */
+  .threshold-display {
+    background: rgba(15,23,42,0.5);
+    border: 1px solid rgba(148,163,184,0.1);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+
+  .threshold-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--slate-600);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .threshold-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .threshold-explanation {
+    font-size: 0.72rem;
+    color: var(--slate-500);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  /* COPY BUTTON */
+  .btn-copy {
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 9px;
+    border: 1px solid rgba(148,163,184,0.2);
+    background: rgba(30,41,59,0.6);
+    color: var(--slate-300);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    margin-top: 20px;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-copy:hover {
+    background: rgba(6,182,212,0.1);
+    border-color: rgba(6,182,212,0.3);
+    color: var(--cyan-400);
+  }
+
+  .btn-copy.copied {
+    background: rgba(16,185,129,0.1);
+    border-color: rgba(16,185,129,0.3);
+    color: var(--emerald-400);
+  }
+
+  /* RESET BUTTON */
+  .btn-reset {
+    padding: 8px 16px;
+    border-radius: 7px;
+    border: 1px solid rgba(148,163,184,0.12);
+    background: transparent;
+    color: var(--slate-500);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+
+  .btn-reset:hover {
+    color: var(--rose-400);
+    border-color: rgba(244,63,94,0.25);
+    background: rgba(244,63,94,0.06);
+  }
+
+  /* STATUS LINE */
+  .status-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--slate-600);
+    margin-bottom: 20px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--slate-700);
+    transition: background 0.3s;
+  }
+
+  .status-dot.active { background: var(--cyan-400); }
+  .status-dot.done { background: var(--emerald-500); }
+  .status-dot.alert { background: var(--rose-500); }
+
+  /* SECTION DIVIDER */
+  .section-divider {
+    height: 1px;
+    background: rgba(148,163,184,0.08);
+    margin: 20px 0;
+  }
+
+  /* RIGHT COLUMN */
+  .right-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* DIMERO INPUT ROW */
+  .dimero-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  /* TOOLTIP */
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    color: var(--slate-600);
+    background: rgba(148,163,184,0.06);
+    border: 1px solid rgba(148,163,184,0.1);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  /* PROGRESS STEPS */
+  .progress-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+  }
+
+  .prog-step {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--slate-700);
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .prog-step.active { color: var(--cyan-400); }
+  .prog-step.done { color: var(--emerald-500); }
+  .prog-step.alert { color: var(--rose-400); }
+
+  .prog-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.58rem;
+    flex-shrink: 0;
+  }
+
+  .prog-step.done .prog-num {
+    background: var(--emerald-500);
+    border-color: var(--emerald-500);
+    color: white;
+  }
+
+  .prog-connector {
+    flex: 1;
+    height: 1px;
+    background: rgba(148,163,184,0.1);
+    margin: 0 8px;
+  }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+
+  /* YEARS COUNT */
+  .years-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.2);
+    color: var(--amber-400);
+  }
+
+  /* SIDEBAR sticky */
+  .sidebar-sticky {
+    position: sticky;
+    top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-brand">
+      <h1 class="header-title">TEP<span>Guard</span></h1>
+      <span class="header-badge">Urgencias</span>
+    </div>
+    <div class="header-source">
+      AHA/ACC 2026 · Tromboembolismo Pulmonar Agudo en Adultos<br>
+      Herramienta de soporte diagnóstico para uso exclusivo médico
+    </div>
+  </header>
+
+  <!-- PROGRESS STEPS -->
+  <div class="progress-steps" id="progressSteps">
+    <div class="prog-step active" id="ps1">
+      <div class="prog-num">1</div>
+      <span>Constantes</span>
+    </div>
+    <div class="prog-connector"></div>
+    <div class="prog-step" id="ps2">
+      <div class="prog-num">2</div>
+      <span>Wells</span>
+    </div>
+    <div class="prog-connector"></div>
+    <div class="prog-step" id="ps3">
+      <div class="prog-num">3</div>
+      <span>PERC</span>
+    </div>
+    <div class="prog-connector"></div>
+    <div class="prog-step" id="ps4">
+      <div class="prog-num">4</div>
+      <span>YEARS + Dímero D</span>
+    </div>
+    <div class="prog-connector"></div>
+    <div class="prog-step" id="ps5">
+      <div class="prog-num">5</div>
+      <span>Resultado</span>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- LEFT: CONSTANTES -->
+    <div class="sidebar-sticky">
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <span class="card-step">PASO 01</span>
+          <h2 class="card-title">Constantes Vitales</h2>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Edad del Paciente</label>
+          <input type="number" id="inputEdad" class="input-field" placeholder="—" min="18" max="120">
+          <div class="input-unit">años</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Frecuencia Cardíaca</label>
+          <input type="number" id="inputFC" class="input-field" placeholder="—" min="30" max="300">
+          <div class="input-unit">latidos por minuto (lpm)</div>
+        </div>
+
+        <div class="input-group" style="margin-bottom:0">
+          <label class="input-label">Saturación de O₂</label>
+          <input type="number" id="inputSat" class="input-field" placeholder="—" min="50" max="100" step="0.1">
+          <div class="input-unit">SpO₂ (%)</div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR: COPY + RESET -->
+      <button class="btn-copy" id="btnCopy" onclick="copyEvolucion()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        Copiar Evolución Médica
+      </button>
+
+      <div style="display:flex;justify-content:center;margin-top:12px">
+        <button class="btn-reset" onclick="resetAll()">
+          ↺ &nbsp;Nueva Consulta
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: FLOW -->
+    <div class="right-stack">
+
+      <!-- WELLS CARD -->
+      <div class="card" id="cardWells">
+        <div class="card-header" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="card-step">PASO 02</span>
+            <h2 class="card-title">Escala de Wells</h2>
+          </div>
+          <span class="info-chip">Escala original validada</span>
+        </div>
+
+        <!-- WELLS ITEM: AUTO FC -->
+        <div class="wells-item auto-item" id="w_fc" style="pointer-events:none">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">
+            Frecuencia cardíaca &gt; 100 lpm
+            <div><span class="auto-badge">Autodetectado</span></div>
+          </div>
+          <div class="item-score" id="w_fc_score">+1.5</div>
+        </div>
+
+        <!-- WELLS MANUAL ITEMS -->
+        <div class="wells-item" id="w1" onclick="toggleWells('w1')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Signos y síntomas clínicos de TVP (trombosis venosa profunda)</div>
+          <div class="item-score">+3.0</div>
+        </div>
+
+        <div class="wells-item" id="w2" onclick="toggleWells('w2')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">TEP es el diagnóstico más probable o igualmente probable</div>
+          <div class="item-score">+3.0</div>
+        </div>
+
+        <div class="wells-item" id="w3" onclick="toggleWells('w3')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Inmovilización ≥ 3 días o cirugía en las 4 semanas previas</div>
+          <div class="item-score">+1.5</div>
+        </div>
+
+        <div class="wells-item" id="w4" onclick="toggleWells('w4')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">TEP previo o TVP documentada</div>
+          <div class="item-score">+1.5</div>
+        </div>
+
+        <div class="wells-item" id="w5" onclick="toggleWells('w5')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Hemoptisis</div>
+          <div class="item-score">+1.0</div>
+        </div>
+
+        <div class="wells-item" id="w6" onclick="toggleWells('w6')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Neoplasia activa (tratamiento en últimos 6 meses o paliativo)</div>
+          <div class="item-score">+1.0</div>
+        </div>
+
+        <!-- SCORE DISPLAY -->
+        <div class="score-display">
+          <div>
+            <div class="score-label">Puntaje Wells</div>
+            <div class="score-category" id="wellsCategory" style="color: #64748b">—</div>
+          </div>
+          <div class="score-value" id="wellsScore" style="color: #94a3b8">0.0</div>
+        </div>
+
+        <!-- WELLS RESULT -->
+        <div id="wellsResult"></div>
+      </div>
+
+      <!-- PERC CARD -->
+      <div class="card hidden" id="cardPERC">
+        <div class="card-header" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="card-step">PASO 03</span>
+            <h2 class="card-title">Regla PERC</h2>
+          </div>
+          <span class="info-chip">Bajo riesgo: Wells &lt; 2.0</span>
+        </div>
+
+        <p style="font-size:0.75rem;color:#64748b;margin-bottom:16px;line-height:1.5">
+          Para TEP excluido clínicamente, <strong style="color:#94a3b8">todos</strong> los criterios deben ser <strong style="color:#94a3b8">negativos</strong> (ninguno presente).
+        </p>
+
+        <div class="section-label">Autodetectados por constantes</div>
+
+        <!-- AUTO PERC -->
+        <div class="wells-item auto-item" id="perc_edad" style="pointer-events:none">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">
+            Edad &lt; 50 años
+            <div><span class="auto-badge">Auto</span></div>
+          </div>
+          <div class="item-score" id="perc_edad_val" style="color:#64748b">—</div>
+        </div>
+
+        <div class="wells-item auto-item" id="perc_fc" style="pointer-events:none">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">
+            FC &lt; 100 lpm
+            <div><span class="auto-badge">Auto</span></div>
+          </div>
+          <div class="item-score" id="perc_fc_val" style="color:#64748b">—</div>
+        </div>
+
+        <div class="wells-item auto-item" id="perc_sat" style="pointer-events:none">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">
+            SpO₂ ≥ 95%
+            <div><span class="auto-badge">Auto</span></div>
+          </div>
+          <div class="item-score" id="perc_sat_val" style="color:#64748b">—</div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-label">Evaluación manual</div>
+
+        <div class="wells-item" id="perc1" onclick="togglePerc('perc1')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Sin edema unilateral de miembro inferior</div>
+          <div class="item-score">PERC</div>
+        </div>
+
+        <div class="wells-item" id="perc2" onclick="togglePerc('perc2')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Sin hemoptisis</div>
+          <div class="item-score">PERC</div>
+        </div>
+
+        <div class="wells-item" id="perc3" onclick="togglePerc('perc3')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Sin cirugía ni trauma reciente (≤ 4 semanas)</div>
+          <div class="item-score">PERC</div>
+        </div>
+
+        <div class="wells-item" id="perc4" onclick="togglePerc('perc4')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Sin antecedente de TEP o TVP previo</div>
+          <div class="item-score">PERC</div>
+        </div>
+
+        <div class="wells-item" id="perc5" onclick="togglePerc('perc5')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Sin uso de estrógenos exógenos</div>
+          <div class="item-score">PERC</div>
+        </div>
+
+        <div id="percResult"></div>
+      </div>
+
+      <!-- YEARS + DIMERO CARD -->
+      <div class="card hidden" id="cardYEARS">
+        <div class="card-header" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="card-step">PASO 04</span>
+            <h2 class="card-title">Criterios YEARS + Dímero D</h2>
+          </div>
+          <span id="yearsBadge" class="years-badge">YEARS: 0</span>
+        </div>
+
+        <div class="section-label">Criterios YEARS (marcar si presentes)</div>
+
+        <div class="years-item" id="y1" onclick="toggleYears('y1')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Signos clínicos de TVP (trombosis venosa profunda)</div>
+        </div>
+
+        <div class="years-item" id="y2" onclick="toggleYears('y2')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">Hemoptisis</div>
+        </div>
+
+        <div class="years-item" id="y3" onclick="toggleYears('y3')">
+          <div class="checkbox-box">
+            <svg class="checkbox-icon" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2.5"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+          </div>
+          <div class="item-text">TEP es el diagnóstico más probable</div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-label">Umbral calculado del Dímero D</div>
+
+        <div class="threshold-display" id="thresholdDisplay">
+          <div class="threshold-label">Umbral de positividad</div>
+          <div class="threshold-value" id="thresholdValue" style="color:#94a3b8">— µg/L</div>
+          <div class="threshold-explanation" id="thresholdExpl">Complete los criterios YEARS para calcular el umbral.</div>
+        </div>
+
+        <div class="section-label">Resultado del Dímero D</div>
+
+        <div class="dimero-row">
+          <div class="input-group" style="margin-bottom:0">
+            <label class="input-label">Valor de Dímero D</label>
+            <input type="number" id="inputDimero" class="input-field" placeholder="—" min="0" step="1" oninput="evaluateDimero()">
+            <div class="input-unit">µg/L (unidades equivalentes a ng/mL)</div>
+          </div>
+        </div>
+
+        <div id="dimeroResult"></div>
+      </div>
+
+    </div><!-- end right-stack -->
+  </div><!-- end main-grid -->
+</div><!-- end app-container -->
+
+<script>
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+const state = {
+  edad: null,
+  fc: null,
+  sat: null,
+  wells: { w_fc: false, w1: false, w2: false, w3: false, w4: false, w5: false, w6: false },
+  perc: { perc1: false, perc2: false, perc3: false, perc4: false, perc5: false },
+  years: { y1: false, y2: false, y3: false },
+  finalResult: null,
+  pathway: null // 'ctpa_direct' | 'perc_negative' | 'dimero_negative' | 'dimero_positive'
+};
+
+const wellsScores = { w_fc: 1.5, w1: 3.0, w2: 3.0, w3: 1.5, w4: 1.5, w5: 1.0, w6: 1.0 };
+
+// ──────────────────────────────────────────────
+// VITALS INPUT LISTENERS
+// ──────────────────────────────────────────────
+document.getElementById('inputEdad').addEventListener('input', function() {
+  state.edad = parseFloat(this.value) || null;
+  onVitalsChange();
+});
+document.getElementById('inputFC').addEventListener('input', function() {
+  state.fc = parseFloat(this.value) || null;
+  onVitalsChange();
+});
+document.getElementById('inputSat').addEventListener('input', function() {
+  state.sat = parseFloat(this.value) || null;
+  onVitalsChange();
+});
+
+function onVitalsChange() {
+  if (state.fc !== null) {
+    const autoFC = state.fc > 100;
+    const el = document.getElementById('w_fc');
+    state.wells.w_fc = autoFC;
+    el.classList.toggle('checked', autoFC);
+  }
+  updateWells();
+  updatePERC();
+}
+
+// ──────────────────────────────────────────────
+// WELLS TOGGLE
+// ──────────────────────────────────────────────
+function toggleWells(id) {
+  state.wells[id] = !state.wells[id];
+  document.getElementById(id).classList.toggle('checked', state.wells[id]);
+  updateWells();
+}
+
+function getWellsScore() {
+  return Object.entries(state.wells).reduce((sum, [k, v]) => sum + (v ? wellsScores[k] : 0), 0);
+}
+
+function updateWells() {
+  const score = getWellsScore();
+  const scoreEl = document.getElementById('wellsScore');
+  const catEl = document.getElementById('wellsCategory');
+  const resultEl = document.getElementById('wellsResult');
+
+  scoreEl.textContent = score.toFixed(1);
+
+  let category = '', color = '#94a3b8';
+  if (score < 2.0) { category = 'Baja probabilidad'; color = '#34d399'; }
+  else if (score <= 4.0) { category = 'Probabilidad intermedia'; color = '#fbbf24'; }
+  else { category = 'Alta probabilidad'; color = '#fb7185'; }
+  catEl.textContent = category;
+  scoreEl.style.color = color;
+
+  // Clear result
+  resultEl.innerHTML = '';
+
+  // Vitals not entered yet
+  if (state.edad === null || state.fc === null || state.sat === null) {
+    resultEl.innerHTML = `<div class="result-card info" style="margin-top:14px">
+      <div class="result-title" style="font-size:0.85rem">Complete las constantes vitales</div>
+      <div class="result-body">Ingrese edad, frecuencia cardíaca y saturación de O₂ para continuar el algoritmo.</div>
+    </div>`;
+    hideCards();
+    return;
+  }
+
+  updateProgress(score);
+
+  if (score > 4.0) {
+    // ALTA SOSPECHA → directo a CTPA
+    state.pathway = 'ctpa_direct';
+    resultEl.innerHTML = `<div class="result-card danger" style="margin-top:14px">
+      <svg class="result-icon" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <div class="result-title">CTPA Indicada — Alta Sospecha Clínica</div>
+      <div class="result-body">Wells > 4.0 puntos (${score.toFixed(1)}). <strong style="color:#fb7185">El Dímero D no tiene utilidad diagnóstica</strong> con esta probabilidad pretest. Se recomienda solicitar <strong style="color:#fb7185">AngioTomografía Computada de Tórax (CTPA)</strong> de forma inmediata según guía AHA/ACC 2026.</div>
+    </div>`;
+    hideCards();
+    document.getElementById('ps2').className = 'prog-step alert';
+    document.getElementById('ps5').className = 'prog-step alert';
+  } else if (score < 2.0) {
+    // Bajo riesgo → PERC
+    document.getElementById('cardPERC').classList.remove('hidden');
+    document.getElementById('cardYEARS').classList.add('hidden');
+    updatePERC();
+    document.getElementById('ps2').className = 'prog-step done';
+    document.getElementById('ps3').className = 'prog-step active';
+  } else {
+    // Intermedio (2.0 - 4.0) → YEARS + DD
+    document.getElementById('cardPERC').classList.add('hidden');
+    document.getElementById('cardYEARS').classList.remove('hidden');
+    updateYEARS();
+    document.getElementById('ps2').className = 'prog-step done';
+    document.getElementById('ps4').className = 'prog-step active';
+    document.getElementById('ps3').className = 'prog-step';
+    document.getElementById('ps3').style.color = '';
+  }
+}
+
+function hideCards() {
+  document.getElementById('cardPERC').classList.add('hidden');
+  document.getElementById('cardYEARS').classList.add('hidden');
+}
+
+// ──────────────────────────────────────────────
+// PERC
+// ──────────────────────────────────────────────
+function togglePerc(id) {
+  state.perc[id] = !state.perc[id];
+  document.getElementById(id).classList.toggle('checked', state.perc[id]);
+  updatePERC();
+}
+
+function updatePERC() {
+  if (document.getElementById('cardPERC').classList.contains('hidden')) return;
+
+  const edad = state.edad;
+  const fc = state.fc;
+  const sat = state.sat;
+
+  // Auto PERC
+  const percEdadOK = edad !== null && edad < 50;
+  const percFCOK = fc !== null && fc < 100;
+  const percSatOK = sat !== null && sat >= 95;
+
+  setAutoPercItem('perc_edad', percEdadOK, 'perc_edad_val', percEdadOK ? '< 50 ✓' : '≥ 50 ✗');
+  setAutoPercItem('perc_fc', percFCOK, 'perc_fc_val', percFCOK ? '< 100 ✓' : '≥ 100 ✗');
+  setAutoPercItem('perc_sat', percSatOK, 'perc_sat_val', percSatOK ? '≥ 95% ✓' : '< 95% ✗');
+
+  // Manual PERC: checked = criterio negativo (sin el factor de riesgo)
+  const manualOK = state.perc.perc1 && state.perc.perc2 && state.perc.perc3 && state.perc.perc4 && state.perc.perc5;
+
+  const allPERCNegative = percEdadOK && percFCOK && percSatOK && manualOK;
+
+  const resultEl = document.getElementById('percResult');
+  resultEl.innerHTML = '';
+
+  if (allPERCNegative) {
+    state.pathway = 'perc_negative';
+    resultEl.innerHTML = `<div class="result-card success" style="margin-top:14px">
+      <svg class="result-icon" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <div class="result-title">TEP Descartado Clínicamente — PERC Negativo</div>
+      <div class="result-body">Todos los criterios PERC son negativos. Probabilidad pretest &lt; 2%. <strong style="color:#34d399">No se requiere Dímero D ni AngioTAC.</strong> El TEP queda excluido clínicamente con seguridad según criterios AHA/ACC 2026.</div>
+    </div>`;
+    document.getElementById('ps3').className = 'prog-step done';
+    document.getElementById('ps5').className = 'prog-step done';
+  } else {
+    // PERC no superado → avanzar a YEARS
+    document.getElementById('cardYEARS').classList.remove('hidden');
+    document.getElementById('ps3').className = 'prog-step done';
+    document.getElementById('ps4').className = 'prog-step active';
+    updateYEARS();
+    if (!allPERCNegative && (percEdadOK !== true || percFCOK !== true || percSatOK !== true || !manualOK)) {
+      // Just inform user PERC not passed, proceed to YEARS
+    }
+  }
+}
+
+function setAutoPercItem(itemId, conditionMet, valId, text) {
+  const el = document.getElementById(itemId);
+  const valEl = document.getElementById(valId);
+  if (conditionMet) {
+    el.classList.add('checked');
+    valEl.style.color = '#34d399';
+    valEl.textContent = text;
+  } else {
+    el.classList.remove('checked');
+    valEl.style.color = '#fb7185';
+    valEl.textContent = text;
+  }
+}
+
+// ──────────────────────────────────────────────
+// YEARS
+// ──────────────────────────────────────────────
+function toggleYears(id) {
+  state.years[id] = !state.years[id];
+  document.getElementById(id).classList.toggle('checked', state.years[id]);
+  updateYEARS();
+}
+
+function getYEARSCount() {
+  return Object.values(state.years).filter(Boolean).length;
+}
+
+function updateYEARS() {
+  const count = getYEARSCount();
+  document.getElementById('yearsBadge').textContent = `YEARS: ${count}`;
+
+  const edad = state.edad;
+  let threshold = 0;
+  let explanation = '';
+
+  if (count === 0) {
+    threshold = 1000;
+    explanation = 'YEARS = 0: umbral elevado de 1000 µg/L (alta especificidad para exclusión)';
+  } else {
+    if (edad !== null && edad > 50) {
+      const ageAdj = edad * 10;
+      threshold = Math.max(ageAdj, 500);
+      explanation = `YEARS ≥ 1 + Edad > 50: umbral ajustado por edad = ${edad} × 10 = ${ageAdj} µg/L`;
+    } else {
+      threshold = 500;
+      explanation = 'YEARS ≥ 1: umbral estándar de 500 µg/L';
+    }
+  }
+
+  const thresholdEl = document.getElementById('thresholdValue');
+  thresholdEl.textContent = `${threshold} µg/L`;
+  thresholdEl.style.color = count === 0 ? '#34d399' : '#fbbf24';
+  document.getElementById('thresholdExpl').textContent = explanation;
+
+  // Re-evaluate if DD already entered
+  evaluateDimero();
+}
+
+function evaluateDimero() {
+  const dimero = parseFloat(document.getElementById('inputDimero').value);
+  const resultEl = document.getElementById('dimeroResult');
+  resultEl.innerHTML = '';
+
+  if (isNaN(dimero)) return;
+
+  const count = getYEARSCount();
+  const edad = state.edad;
+  let threshold = 0;
+
+  if (count === 0) {
+    threshold = 1000;
+  } else {
+    if (edad !== null && edad > 50) {
+      threshold = Math.max(edad * 10, 500);
+    } else {
+      threshold = 500;
+    }
+  }
+
+  if (dimero < threshold) {
+    state.pathway = 'dimero_negative';
+    resultEl.innerHTML = `<div class="result-card success" style="margin-top:14px">
+      <svg class="result-icon" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <div class="result-title">TEP Excluido con Seguridad</div>
+      <div class="result-body">Dímero D: <strong style="color:#34d399">${dimero} µg/L</strong> — inferior al umbral calculado de <strong style="color:#34d399">${threshold} µg/L</strong>. Combinado con probabilidad pretest baja/intermedia por Wells (${getWellsScore().toFixed(1)} pts) y criterios YEARS (${count}), el TEP queda excluido con seguridad según algoritmo YEARS/Dímero D ajustado por edad — AHA/ACC 2026.</div>
+    </div>`;
+    document.getElementById('ps4').className = 'prog-step done';
+    document.getElementById('ps5').className = 'prog-step done';
+  } else {
+    state.pathway = 'dimero_positive';
+    resultEl.innerHTML = `<div class="result-card danger" style="margin-top:14px">
+      <svg class="result-icon" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <div class="result-title">CTPA Indicada — Dímero D Elevado</div>
+      <div class="result-body">Dímero D: <strong style="color:#fb7185">${dimero} µg/L</strong> — superior o igual al umbral de ${threshold} µg/L. Se requiere <strong style="color:#fb7185">AngioTomografía Computada de Tórax (CTPA)</strong> para confirmación o exclusión definitiva de TEP según protocolo AHA/ACC 2026.</div>
+    </div>`;
+    document.getElementById('ps4').className = 'prog-step done';
+    document.getElementById('ps5').className = 'prog-step alert';
+  }
+}
+
+// ──────────────────────────────────────────────
+// PROGRESS
+// ──────────────────────────────────────────────
+function updateProgress(wellsScore) {
+  document.getElementById('ps1').className = 'prog-step done';
+  document.getElementById('ps2').className = 'prog-step active';
+}
+
+// ──────────────────────────────────────────────
+// COPY EVOLUCION
+// ──────────────────────────────────────────────
+function copyEvolucion() {
+  const now = new Date();
+  const fecha = now.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const hora = now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+
+  const edad = state.edad ?? '—';
+  const fc = state.fc ?? '—';
+  const sat = state.sat ?? '—';
+  const wells = getWellsScore().toFixed(1);
+
+  let wellsCat = wells > 4.0 ? 'Alta probabilidad' : wells < 2.0 ? 'Baja probabilidad' : 'Probabilidad intermedia';
+
+  const wellsItems = [
+    state.wells.w_fc ? '  ✓ FC > 100 lpm (+1.5)' : '  ✗ FC ≤ 100 lpm',
+    state.wells.w1 ? '  ✓ Signos TVP (+3.0)' : '  ✗ Sin signos TVP',
+    state.wells.w2 ? '  ✓ TEP dx más probable (+3.0)' : '  ✗ TEP no es dx principal',
+    state.wells.w3 ? '  ✓ Inmovilización/cirugía reciente (+1.5)' : '  ✗ Sin inmovilización/cirugía',
+    state.wells.w4 ? '  ✓ TEP/TVP previo (+1.5)' : '  ✗ Sin antecedente',
+    state.wells.w5 ? '  ✓ Hemoptisis (+1.0)' : '  ✗ Sin hemoptisis',
+    state.wells.w6 ? '  ✓ Neoplasia activa (+1.0)' : '  ✗ Sin neoplasia activa',
+  ].join('\n');
+
+  let percText = '';
+  if (!document.getElementById('cardPERC').classList.contains('hidden')) {
+    const percEdadOK = state.edad !== null && state.edad < 50;
+    const percFCOK = state.fc !== null && state.fc < 100;
+    const percSatOK = state.sat !== null && state.sat >= 95;
+    const allPerc = percEdadOK && percFCOK && percSatOK && state.perc.perc1 && state.perc.perc2 && state.perc.perc3 && state.perc.perc4 && state.perc.perc5;
+    percText = `\n\nREGLA PERC:
+  Edad < 50: ${percEdadOK ? 'SÍ' : 'NO'}
+  FC < 100: ${percFCOK ? 'SÍ' : 'NO'}
+  SpO2 ≥ 95%: ${percSatOK ? 'SÍ' : 'NO'}
+  Sin edema unilateral MMII: ${state.perc.perc1 ? 'SÍ' : 'NO'}
+  Sin hemoptisis: ${state.perc.perc2 ? 'SÍ' : 'NO'}
+  Sin cirugía/trauma reciente: ${state.perc.perc3 ? 'SÍ' : 'NO'}
+  Sin TEP/TVP previo: ${state.perc.perc4 ? 'SÍ' : 'NO'}
+  Sin uso de estrógenos: ${state.perc.perc5 ? 'SÍ' : 'NO'}
+  Resultado PERC: ${allPerc ? 'NEGATIVO — TEP excluido clínicamente' : 'POSITIVO — requiere evaluación adicional'}`;
+  }
+
+  let yearsText = '';
+  if (!document.getElementById('cardYEARS').classList.contains('hidden')) {
+    const yCount = getYEARSCount();
+    const dimeroVal = parseFloat(document.getElementById('inputDimero').value);
+    let threshold = yCount === 0 ? 1000 : (state.edad > 50 ? Math.max(state.edad * 10, 500) : 500);
+    yearsText = `\n\nCRITERIOS YEARS:
+  Signos TVP: ${state.years.y1 ? 'SÍ' : 'NO'}
+  Hemoptisis: ${state.years.y2 ? 'SÍ' : 'NO'}
+  TEP dx más probable: ${state.years.y3 ? 'SÍ' : 'NO'}
+  Puntaje YEARS: ${yCount}/3
+  Umbral Dímero D calculado: ${threshold} µg/L
+  Dímero D informado: ${isNaN(dimeroVal) ? 'No ingresado' : dimeroVal + ' µg/L'}`;
+    if (!isNaN(dimeroVal)) {
+      yearsText += `\n  Interpretación: ${dimeroVal < threshold ? 'INFERIOR al umbral — TEP excluido' : 'SUPERIOR/IGUAL al umbral — indicación de CTPA'}`;
+    }
+  }
+
+  let conclusion = '';
+  switch(state.pathway) {
+    case 'ctpa_direct': conclusion = 'CONCLUSIÓN: Alta sospecha clínica de TEP (Wells > 4.0). Indicación de CTPA inmediata. Dímero D no tiene utilidad en este escenario.'; break;
+    case 'perc_negative': conclusion = 'CONCLUSIÓN: TEP descartado clínicamente por regla PERC (todos los criterios negativos). No se requiere Dímero D ni estudios de imagen.'; break;
+    case 'dimero_negative': conclusion = 'CONCLUSIÓN: TEP excluido con seguridad mediante algoritmo YEARS + Dímero D ajustado por edad. No se requiere AngioTAC.'; break;
+    case 'dimero_positive': conclusion = 'CONCLUSIÓN: Dímero D elevado por encima del umbral calculado. Se indica AngioTomografía de Tórax (CTPA) para confirmación o exclusión de TEP.'; break;
+    default: conclusion = 'Evaluación incompleta — continuar el algoritmo.';
+  }
+
+  const text = `=== EVALUACIÓN DE TEP — SERVICIO DE URGENCIAS ===
+Fecha: ${fecha}  Hora: ${hora}
+Herramienta: TEPGuard — Basada en AHA/ACC 2026
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CONSTANTES VITALES:
+  Edad: ${edad} años
+  Frecuencia Cardíaca: ${fc} lpm
+  Saturación O₂: ${sat}%
+
+ESCALA DE WELLS:
+${wellsItems}
+  PUNTAJE TOTAL: ${wells} puntos — ${wellsCat}${percText}${yearsText}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${conclusion}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Evaluación realizada con herramienta de soporte clínico.
+No reemplaza el juicio clínico del médico tratante.`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btnCopy');
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copiado al portapapeles`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar Evolución Médica`;
+    }, 2500);
+  });
+}
+
+// ──────────────────────────────────────────────
+// RESET
+// ──────────────────────────────────────────────
+function resetAll() {
+  document.getElementById('inputEdad').value = '';
+  document.getElementById('inputFC').value = '';
+  document.getElementById('inputSat').value = '';
+  document.getElementById('inputDimero').value = '';
+
+  Object.keys(state.wells).forEach(k => { state.wells[k] = false; document.getElementById(k)?.classList.remove('checked'); });
+  Object.keys(state.perc).forEach(k => { state.perc[k] = false; document.getElementById(k)?.classList.remove('checked'); });
+  Object.keys(state.years).forEach(k => { state.years[k] = false; document.getElementById(k)?.classList.remove('checked'); });
+
+  state.edad = null; state.fc = null; state.sat = null;
+  state.pathway = null;
+
+  document.getElementById('wellsScore').textContent = '0.0';
+  document.getElementById('wellsScore').style.color = '#94a3b8';
+  document.getElementById('wellsCategory').textContent = '—';
+  document.getElementById('wellsResult').innerHTML = '';
+  document.getElementById('percResult').innerHTML = '';
+  document.getElementById('dimeroResult').innerHTML = '';
+  document.getElementById('yearsBadge').textContent = 'YEARS: 0';
+  document.getElementById('thresholdValue').textContent = '— µg/L';
+  document.getElementById('thresholdValue').style.color = '#94a3b8';
+  document.getElementById('thresholdExpl').textContent = 'Complete los criterios YEARS para calcular el umbral.';
+
+  hideCards();
+
+  ['ps1','ps2','ps3','ps4','ps5'].forEach((id,i) => {
+    document.getElementById(id).className = i === 0 ? 'prog-step active' : 'prog-step';
+  });
+
+  // Reset auto PERC displays
+  ['perc_edad_val','perc_fc_val','perc_sat_val'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = '—'; el.style.color = '#64748b'; }
+  });
+  ['perc_edad','perc_fc','perc_sat'].forEach(id => {
+    document.getElementById(id)?.classList.remove('checked');
+  });
+}
+</script>
+</body>
+</html>
